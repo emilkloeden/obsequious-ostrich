@@ -1,0 +1,32 @@
+- name: Send email with SendGrid
+  env:
+    SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+    SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+    RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+  run: |
+    # Turn off command echoing to avoid leaking secrets in logs
+    set +x
+    
+    RESULTS=$(cat scraping_results.txt)
+    ESCAPED_RESULTS=$(echo "$RESULTS" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+    
+    echo "Sending email - details hidden for security"
+    
+    curl --silent --output /dev/null --show-error --fail \
+      --request POST \
+      --url https://api.sendgrid.com/v3/mail/send \
+      --header "Authorization: Bearer $SENDGRID_API_KEY" \
+      --header 'Content-Type: application/json' \
+      --data "{
+        \"personalizations\": [{\"to\": [{\"email\": \"$RECIPIENT_EMAIL\"}]}],
+        \"from\": {\"email\": \"$SENDER_EMAIL\"},
+        \"subject\": \"Web Scraping Results\",
+        \"content\": [{\"type\": \"text/plain\", \"value\": \"$ESCAPED_RESULTS\"}]
+      }"
+    
+    if [ $? -eq 0 ]; then
+      echo "Email sent successfully!"
+    else
+      echo "Failed to send email"
+      exit 1
+    fi
