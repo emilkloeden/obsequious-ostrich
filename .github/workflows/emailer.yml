@@ -7,7 +7,7 @@ on:
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
       SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
