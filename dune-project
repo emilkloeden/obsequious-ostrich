@@ -1,5 +1,6 @@
 (lang dune 2.9)
 (name web_json_example)
+(generate_opam_files true)
 (package
 (name web_json_example)
 (depends
