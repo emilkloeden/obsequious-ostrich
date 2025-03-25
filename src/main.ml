@@ -81,6 +81,7 @@ let format_match_data results =
 let send_email results =
   (* Read environment variables *)
   let api_key = try Sys.getenv "SENDGRID_API_KEY" with Not_found -> failwith "SENDGRID_API_KEY not set" in
+  
   let sender = try Sys.getenv "SENDER_EMAIL" with Not_found -> failwith "SENDER_EMAIL not set" in
   let recipient_str = try Sys.getenv "RECIPIENT_EMAIL" with Not_found -> failwith "RECIPIENT_EMAIL not set" in
   

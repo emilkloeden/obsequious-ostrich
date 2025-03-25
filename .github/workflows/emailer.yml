@@ -8,6 +8,7 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-22.04
+    environment: production  # Add this line if using environment-specific secrets
     env:
       SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
       SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
@@ -37,7 +38,6 @@ jobs:
       
       - name: Install OCaml dependencies
         run: |
-          opam install . --deps-only
           opam install cohttp-lwt-unix yojson lwt tls-lwt lambdasoup uri dotenv base --yes
           opam install dune
           eval $(opam env)
