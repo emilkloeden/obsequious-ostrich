@@ -38,6 +38,7 @@ jobs:
       - name: Install OCaml dependencies
         run: |
           opam install . --deps-only
+          opam install cohttp-lwt-unix yojson lwt tls-lwt lambdasoup uri dotenv base --yes
           opam install dune
           eval $(opam env)
           dune build --display=short
