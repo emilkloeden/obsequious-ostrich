@@ -1,9 +1,9 @@
-name: Web Scraper
+name: NBA Game Recomender Emailer
 
 on:
   schedule:
     - cron: '0 3 * * *'  # Runs at 8am UTC every day
-  workflow_dispatch:     # Allows manual triggering
+  workflow_dispatch:     # Allows manual triggering from GitHub UI
 
 jobs:
   scrape:
@@ -19,18 +19,11 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: 4.14.0
-          opam-repositories: |
-            default: https://opam.ocaml.org
-          opam-depext: false  # Disable automatic system dependency installation
       
-      - name: Install system dependencies manually
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y bubblewrap g++-multilib gcc-multilib mercurial musl-tools rsync
-      
-      - name: Install OCaml dependencies
-        run: |
-          opam install . --deps-only --with-test
+          opam install . --deps-only
+          opam install dune
       
       - name: Build and run scraper
         run: |
