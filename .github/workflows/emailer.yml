@@ -1,9 +1,9 @@
-name: NBA Game Recomender Emailer
+name: NBA Emailer
 
 on:
   schedule:
     - cron: '0 3 * * *'  # Runs at 8am UTC every day
-  workflow_dispatch:     # Allows manual triggering from GitHub UI
+  workflow_dispatch:     # Allows manual triggering
 
 jobs:
   scrape:
@@ -13,20 +13,36 @@ jobs:
       SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
       RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      
+      - name: Debug directory structure
+        run: |
+          pwd
+          ls -la
+          if [ -f dune-project ]; then
+            echo "dune-project found"
+            cat dune-project
+          else
+            echo "dune-project not found"
+          fi
       
       - name: Set up OCaml
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: 4.14.0
+          cache-prefix: v1-${{ hashFiles('**/*.opam') }}-${{ hashFiles('**/dune-project') }}
       
-      - name: Install dependencies
+      - name: Install OCaml dependencies
         run: |
           opam install . --deps-only
           opam install dune
+          eval $(opam env)
+          dune build --display=short
       
-      - name: Build and run scraper
+      - name: Run Program
         run: |
           eval $(opam env)
-          dune build
           dune exec -- src/main.exe
