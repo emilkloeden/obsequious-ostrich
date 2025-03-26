@@ -2,11 +2,11 @@ name: NBA Emailer
 
 on:
   schedule:
-    - cron: '0 3 * * *'  # Runs at 8am UTC every day
+    - cron: '0 4 * * *'  # Runs at 8am UTC every day
   workflow_dispatch:     # Allows manual triggering
 
 jobs:
-  scrape:
+  be-beautiful:
     runs-on: ubuntu-22.04
     environment: production  # Add this line if using environment-specific secrets
     env:
