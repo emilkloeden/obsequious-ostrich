@@ -77,6 +77,46 @@ let format_match_data results =
     ) results
   )
 
+(* Function to send email to a single recipient using MailerSend *)
+let send_single_email recipient sender api_key subject content =
+  (* Print request information *)
+  Printf.printf "\nSending email to: %s\n" recipient;
+  
+  (* Create payload for a single recipient *)
+  let payload = `Assoc [
+    ("to", `List [
+      `Assoc [("email", `String recipient)]
+    ]);
+    ("from", `Assoc [
+      ("email", `String sender)
+    ]);
+    ("subject", `String subject);
+    ("text", `String content)
+  ] in
+  
+  (* Convert payload to JSON string *)
+  let payload_str = Yojson.Safe.to_string payload in
+  
+  (* Create headers *)
+  let headers = Header.init ()
+    |> fun h -> Header.add h "Authorization" ("Bearer " ^ api_key)
+    |> fun h -> Header.add h "X-Requested-With" "XMLHttpRequest"
+    |> fun h -> Header.add h "Content-Type" "application/json" in
+  
+  (* Send request to MailerSend API *)
+  let uri = Uri.of_string "https://api.mailersend.com/v1/email" in
+  let body = Cohttp_lwt.Body.of_string payload_str in
+  
+  Client.post ~headers ~body uri >>= fun (resp, body) ->
+    let status = resp |> Response.status |> Code.code_of_status in
+    body |> Cohttp_lwt.Body.to_string >>= fun body_str ->
+      if status >= 200 && status < 300 then (
+        Printf.printf "Email sent successfully to %s (Status: %d)\n" recipient status;
+        Lwt.return_unit
+      ) else (
+        Printf.printf "Failed to send email to %s (Status: %d): %s\n" recipient status body_str;
+        Lwt.return_unit
+      )
 (* Function to send email via SendGrid *)
 let send_email results =
   (* Read environment variables *)
@@ -99,62 +139,24 @@ in
   
   (* Build the email content - format match data into readable text *)
   let content = format_match_data results in
-
-  (* Create recipient list for SendGrid *)
-  let recipient_json = `List (
-    List.map (fun email -> `Assoc [("email", `String email)]) recipients
-  ) in
-  
-  (* Create SendGrid API request payload *)
-  let payload = `Assoc [
     
-    ("to", recipient_json);
-    ("from", `Assoc [
-      ("email", `String sender)
-    ]);
-    ("subject", `String (sprintf "Best NBA Games today - %s" date_str));
-    ("text", `String content)
-  ] in
-  
-  (* Convert payload to JSON string *)
-  let payload_str = Yojson.Safe.to_string payload in
-  
-  (* Print request information instead of sending *)
-  Printf.printf "\n======= MailerSend API Request (Preview) =======\n";
-  Printf.printf "URL: https://api.mailersend.com/v1/email/\n";
-  Printf.printf "Method: POST\n";
-  Printf.printf "Headers:\n";
-  Printf.printf "  Authorization: Bearer %s...\n" (String.sub api_key 0 (min 5 (String.length api_key)) ^ "...");
-  Printf.printf "  Content-Type: application/json\n";
-  Printf.printf "  X-Requested-With: XMLHttpRequest\n";
-  
-
-  Printf.printf "Body:\n%s\n" (Yojson.Safe.pretty_to_string payload);
-  Printf.printf "=================================================\n";
-  
   
 
   
-  (* Create headers *)
-  let headers = Header.init ()
-    |> fun h -> Header.add h "Authorization" ("Bearer " ^ api_key)
-    |> fun h -> Header.add h "X-Requested-With" "XMLHttpRequest"
-    |> fun h -> Header.add h "Content-Type" "application/json" in
+   (* Create the subject line *)
+  let subject = sprintf "Best NBA Games today - %s" date_str in
   
-  (* Send request to SendGrid API *)
-  let uri = Uri.of_string "https://api.mailersend.com/v1/email" in
-  let body = Cohttp_lwt.Body.of_string payload_str in
+  (* Print summary before sending *)
+  Printf.printf "\n======= Sending Emails with MailerSend =======\n";
+  Printf.printf "Sending to %d recipients: %s\n" 
+    (List.length recipients) (String.concat ", " recipients);
+  Printf.printf "Subject: %s\n" subject;
+  Printf.printf "==============================================\n";
   
-  Client.post ~headers ~body uri >>= fun (resp, body) ->
-    let status = resp |> Response.status |> Code.code_of_status in
-    body |> Cohttp_lwt.Body.to_string >>= fun body_str ->  (* Changed to >>= and renamed variable *)
-      if status >= 200 && status < 300 then (
-        Printf.printf "Email sent successfully (Status: %d)\n" status;
-        Lwt.return_unit  (* Add return unit at the end *)
-      ) else (
-        Printf.printf "Failed to send email (Status: %d): %s\n" status body_str;  (* Use body_str *)
-        Lwt.return_unit  (* Add return unit at the end *)
-        )
+  (* Send individual emails to each recipient *)
+  Lwt_list.iter_s 
+    (fun recipient -> send_single_email recipient sender api_key subject content) 
+    recipients
 
 (* Main function *)
 let main () =

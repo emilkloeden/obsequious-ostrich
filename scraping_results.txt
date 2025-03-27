@@ -1,0 +1,29 @@
+Match #1
+LA Clippers vs New York Knicks
+Score: 4.5
+Link: https://www.nba.com/game/lac-vs-nyk-0022401056?watch
+
+Match #2
+Los Angeles Lakers vs Indiana Pacers
+Score: 4.4
+Link: https://www.nba.com/game/lal-vs-ind-0022401055?watch
+
+Match #3
+Milwaukee Bucks vs Denver Nuggets
+Score: 4.3
+Link: https://www.nba.com/game/mil-vs-den-0022401057?watch
+
+Match #4
+Boston Celtics vs Phoenix Suns
+Score: 3.1
+Link: https://www.nba.com/game/bos-vs-phx-0022401058?watch
+
+Match #5
+Washington Wizards vs Philadelphia 76ers
+Score: 2.1
+Link: https://www.nba.com/game/was-vs-phi-0022401053?watch
+
+Match #6
+Toronto Raptors vs Brooklyn Nets
+Score: 1.3
+Link: https://www.nba.com/game/tor-vs-bkn-0022401054?watch
