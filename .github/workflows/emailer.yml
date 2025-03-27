@@ -2,7 +2,7 @@ name: NBA Emailer
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # Runs at 8am UTC every day
+    - cron: '0 5 * * *'  # Runs at 3pm AEST
   workflow_dispatch:     # Allows manual triggering
 
 jobs:
